@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CrmUser;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Client\RequestException;
 use Exception;
 
@@ -11,44 +14,76 @@ class CrmUserController extends Controller
 {
 
     /**
-    * From request give token and get auth user from auth server
-    * @param Request
-    * @return String
-    * 
-    */
-    public function getAuthToken (Request $request) {
+     * From request give token and get auth user from auth server
+     * @param Request $request
+     * @return String
+     */
+    public function getCrmToken(Request $request)
+    {
         $token = $request->bearerToken();
-        if(!$token) {
+        if (!$token) {
             return false;
         }
         return $token;
     }
 
     /**
-    * From request give token and get auth user from auth server
-    * @param token String
-    * @return Collection
-    */
-    public function getAuthUser ($token) :Collection {
+     * From request give token and get auth user from auth server
+     * @param $token String
+     * @return Collection
+     */
+    public function getCrmUser(string $token): ?Collection
+    {
+
         $response = Http::withToken($token)->get(config('app.auth_server') . '/api/auth/user');
-        return $response->collect();
+        if ($response->ok()) {
+            $result = $response->collect();
+            return collect($result->get('data'));
+        }
+        return collect();
     }
 
 
     /**
-     * [setAuthUser description]
      *
-     * @param   Request  $request  [$request description]
-     * @param   [type]   $request  [$request description]
-     * @param   [type]   $token    [$token description]
-     * @param   [type]   $token    [$token description]
-     *
-     * @return  [type]             [return description]
+     * @param Request $request [$request description]
+     * @return void [type]             [return description]
      */
-    public function setAuthUser(Request $request) {
-        $token = $authUser->getAuthToken($request);
-        if($token) {
-            $authUser->getAuthUser($token);
+    public function saveCrmUser(Request $request)
+    {
+        $token = $this->getCrmToken($request);
+        if ($token) {
+            $this->setCrmUser($this->getCrmUser($token), $token);
+        }
+    }
+
+    /**
+     *
+     * @param Collection $user
+     * @param $token
+     */
+
+    public function setCrmUser(Collection $user, $token)
+    {
+        if ($user->has('id')) {
+            $crmUser = CrmUser::updateOrCreate(
+                [
+                    'id' => $user->get('id'),
+                ],
+                [
+                    'id' => $user->get('id'),
+                    'name' => $user->get('name'),
+                    'email' => $user->get('email'),
+                ]);
+            $crmUser->crmToken()->updateOrCreate([
+                'token' => $token
+            ],
+                [
+                    'crm_user_id' => $crmUser->id,
+                    'token' => $token,
+                    'last_used_at'  => Carbon::now()
+                ]
+            );
         }
     }
 }

@@ -140,7 +140,7 @@ return [
     */
 
     'providers' => [
-
+        App\Providers\CrmUserServiceProvider::class,
         /*
          * Laravel Framework Service Providers...
          */
@@ -174,7 +174,6 @@ return [
         /*
          * Application Service Providers...
          */
-        App\Providers\CrmUserServiceProvider::class,
         
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,

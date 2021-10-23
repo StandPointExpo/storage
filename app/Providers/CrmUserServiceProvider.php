@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\CrmUserController;
 use Illuminate\Http\Request;
@@ -26,6 +27,6 @@ class CrmUserServiceProvider extends ServiceProvider
     public function boot(Request $request)
     {
         $authUser = new CrmUserController;
-        $authUser->setAuthUser($request);
+        $authUser->saveCrmUser($request);
     }
 }

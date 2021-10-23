@@ -23,7 +23,7 @@ class CrmUserValidate
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!$this->crmUserController->getAuthToken($request)) {
+        if(!$this->crmUserController->getCrmToken($request)) {
             return response('Unauthorized.', 401);
         };
         return $next($request);

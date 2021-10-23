@@ -17,7 +17,8 @@ class CreateCrmUsersTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp();   
+            $table->softDeletes();
+            $table->timestamps();
         });
     }
 
