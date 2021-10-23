@@ -124,6 +124,11 @@ return [
     'cipher' => 'AES-256-CBC',
 
     /*
+    | Server where get auth user
+    */
+    'auth_server' => env('AUTH_SERVER', 'localhost'),
+
+    /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
@@ -169,6 +174,8 @@ return [
         /*
          * Application Service Providers...
          */
+        App\Providers\CrmUserServiceProvider::class,
+        
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
