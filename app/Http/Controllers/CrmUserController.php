@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CrmToken;
 use App\Models\CrmUser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -25,6 +26,20 @@ class CrmUserController extends Controller
             return false;
         }
         return $token;
+    }
+
+    /**
+     * From request give token and get auth user from auth server
+     * @param Request $request
+     * @return String
+     */
+    public function getCrmUserToken(Request $request)
+    {
+        $data = CrmToken::where('token', '=', $this->getCrmToken($request))->first();
+        if (!$data) {
+            return false;
+        }
+        return $data->token;
     }
 
     /**

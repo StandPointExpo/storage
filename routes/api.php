@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\CrmFileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Models\CrmFile;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,10 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('crm.user')->get('/file-manager', function (Request $request) {
-    return $request->user();
-});
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'crm.user', 'prefix' => 'crm-files', 'as' => 'file_manager'], function () {
+   Route::get('/{file_original_name}', [CrmFileController::class, 'crmFileDownload'])->name('crm_file_download');
+   Route::post('/', [CrmFileController::class, 'crmFileUpload'])->name('crm_file_upload');
 });

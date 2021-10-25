@@ -17,13 +17,13 @@ class CrmUserValidate
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!$this->crmUserController->getCrmToken($request)) {
+        if(!$this->crmUserController->getCrmUserToken($request)) {
             return response('Unauthorized.', 401);
         };
         return $next($request);

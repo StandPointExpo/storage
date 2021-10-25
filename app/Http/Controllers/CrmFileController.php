@@ -4,82 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\CrmFile;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CrmFileController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Store a newly created resource in storage.
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
      */
-    public function index()
+    public function crmFileUpload(Request $request): Response
     {
-        //
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param $fileName
+     * @return Response
      */
-    public function store(Request $request)
+    public function crmFileDownload($fileName): Response
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\CrmFile  $crmFile
-     * @return \Illuminate\Http\Response
-     */
-    public function show(CrmFile $crmFile)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\CrmFile  $crmFile
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(CrmFile $crmFile)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\CrmFile  $crmFile
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, CrmFile $crmFile)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\CrmFile  $crmFile
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(CrmFile $crmFile)
-    {
-        //
+        $file = CrmFile::where('file_name', $fileName)->first();
+        dd(files_storage($file->file_source));
     }
 }
+
+
+//# id, user_id, admin_id, fileable_type, fileable_id, publication, file_position, file_name, file_original_name, file_type, file_source, file_share, file_comment, extension, deleted_at, created_at, updated_at
+//'1191', '6', NULL, 'projects', '338', '1', '1525243994774', 'attachment_1525243994774_6fb9c35d92a6c762994e2c4981efd9831558096086_.jpg', 'stand_front_left.jpg', 'image', 'public/repository/projects/338/Design/original/attachment_1525243994774_6fb9c35d92a6c762994e2c4981efd9831558096086_.jpg', '0', NULL, 'jpg', NULL, '2021-05-08 23:46:18', '2021-05-08 23:46:18'
