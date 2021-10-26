@@ -12,6 +12,8 @@ class CrmUser extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    const NEXTCLOUD_STORAGE = 'data';
+    const USER_FOLDER = 'admin';
 
     /**
      * The attributes that are mass assignable.

@@ -2,12 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\Handler;
 use App\Models\CrmFile;
+use App\Repositories\CrmFileRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Traits\Statusable;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CrmFileController extends Controller
 {
+    use Statusable;
+
+    private $repository;
+
+    public function __construct() {
+        $this->repository = new CrmFileRepository();
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -23,15 +35,16 @@ class CrmFileController extends Controller
      * Store a newly created resource in storage.
      *
      * @param $fileName
-     * @return Response
+     * @return BinaryFileResponse
      */
-    public function crmFileDownload($fileName): Response
+    public function crmFileDownload($fileName)
     {
-        $file = CrmFile::where('file_name', $fileName)->first();
-        dd(files_storage($file->file_source));
+        try {
+            $file = $this->repository->getCrmFile($fileName);
+            $headers = array('Content-Type' => mime_content_type(files_storage($file->file_source)));
+            return response()->download(files_storage($file->file_source), $file->file_original_name, $headers);
+        } catch (Handler $exception) {
+            return $this->fail($exception);
+        }
     }
 }
-
-
-//# id, user_id, admin_id, fileable_type, fileable_id, publication, file_position, file_name, file_original_name, file_type, file_source, file_share, file_comment, extension, deleted_at, created_at, updated_at
-//'1191', '6', NULL, 'projects', '338', '1', '1525243994774', 'attachment_1525243994774_6fb9c35d92a6c762994e2c4981efd9831558096086_.jpg', 'stand_front_left.jpg', 'image', 'public/repository/projects/338/Design/original/attachment_1525243994774_6fb9c35d92a6c762994e2c4981efd9831558096086_.jpg', '0', NULL, 'jpg', NULL, '2021-05-08 23:46:18', '2021-05-08 23:46:18'
