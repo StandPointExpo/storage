@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Traits\Statusable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CrmFileController extends Controller
@@ -17,18 +18,32 @@ class CrmFileController extends Controller
 
     private $repository;
 
-    public function __construct() {
+    public function __construct()
+    {
+        dd(auth('crm.user')->user()); //TODO додати guard, отрмати активного юзера
+        $this->user = auth('api')->user();
+
         $this->repository = new CrmFileRepository();
     }
+
     /**
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function crmFileUpload(Request $request): Response
+    public function crmFileUpload(Request $request): \Illuminate\Http\JsonResponse
     {
-
+        try {
+            $file = new CrmFile();
+            $file->uuid = $request->get('uuid');
+            $file->publication = true;
+            $file->file_name = $request->get('resumableFilename');
+            $file->save();
+            return $this->success($file);
+        } catch (Handler $exception) {
+            return $this->fail($exception);
+        }
     }
 
     /**
