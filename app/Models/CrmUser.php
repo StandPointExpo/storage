@@ -32,7 +32,7 @@ class CrmUser extends Model
 
     public function crmToken(): HasOne
     {
-        return $this->hasOne(CrmToken::class);
+        return $this->hasOne(CrmToken::class, 'crm_user_id');
     }
 
     /**

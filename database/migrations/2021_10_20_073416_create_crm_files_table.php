@@ -21,7 +21,7 @@ class CreateCrmFilesTable extends Migration
                 $table->string('file_name');
                 $table->string('file_type');
                 $table->string('file_source');
-                $table->string('file_share');
+                $table->string('file_share')->nullable();
                 $table->string('extension');
                 $table->softDeletes();
                 $table->timestamps();

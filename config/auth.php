@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'crm-api' => [
+            'driver' => 'crm-token',
+            'provider' => 'crm-users',
+        ],
     ],
 
     /*
@@ -63,6 +67,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+        'crm-users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\CrmUser::class,
         ],
 
         // 'users' => [
