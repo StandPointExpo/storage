@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Exceptions\Handler;
 use App\Models\CrmFile;
 use App\Repositories\CrmFileRepository;
+use FG\ASN1\Universal\Boolean;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Traits\Statusable;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
 //use Modules\Files\Http\Resources\FileResource;
 use App\Traits\ChunkFileUploadable;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadFailedException;
@@ -40,6 +43,7 @@ class CrmFileController extends Controller
      *
      * @param Request $request
      * @return JsonResponse | $fileProgress
+     * @throws UploadMissingFileException
      */
     public function crmFileUpload(Request $request)
     {
@@ -71,8 +75,6 @@ class CrmFileController extends Controller
                 "done" => $handler->getPercentageDone(),
                 'status' => true
             ]);
-
-
 
 
 ////dd($request->all());
@@ -154,25 +156,25 @@ class CrmFileController extends Controller
      *
      * @return JsonResponse
      */
-    protected function saveFile(UploadedFile $file, Request $request) {
+    protected function saveFile(UploadedFile $file, Request $request)
+    {
         $user_obj = auth()->user();
-        $fileName = $this->createFilename($file);
 
         // Get file mime type
         $mime_original = $file->getMimeType();
         $mime = str_replace('/', '-', $mime_original);
+        $projectFolder = $request->get('project_name');
+        $foldersThree = json_decode($request->get('folders_tree'));
 
-        $folderDATE = $request->dataDATE;
+        $filePath = "{$projectFolder}/{$this->foldersThreeString($foldersThree)}/";
+        $fileName = $this->createFilename($file, $filePath);
 
-        $folder  = $folderDATE;
-        $filePath = "public/upload/medialibrary/id/folder/";
-        $finalPath = storage_path("app/".$filePath);
+        //Storage::disk('nextcloud')->makeDirectory($filePath);
+        $finalPath = files_storage("projects/{$filePath}");
 
         $fileSize = $file->getSize();
         // move the file name
         $file->move($finalPath, $fileName);
-
-        $url_base = 'storage/upload/medialibrary/$user_obj/folderDATE}/'.$fileName;
 
         return response()->json([
             'path' => $filePath,
@@ -181,22 +183,37 @@ class CrmFileController extends Controller
         ]);
     }
 
+
+    /**
+     * Create valid folders three for uploaded file
+     * @param array $folderThree
+     * @return string
+     */
+    public function foldersThreeString(array $folderThree): string
+    {
+        return implode('/', $folderThree);
+    }
+
     /**
      * Create unique filename for uploaded file
      * @param UploadedFile $file
+     * @param $filePath
      * @return string
      */
-    protected function createFilename(UploadedFile $file) {
+    protected function createFilename(UploadedFile $file, $filePath): string
+    {
+        return $this->checkExistFileName($file, $file->getClientOriginalName(), $filePath);
+    }
+
+    public function checkExistFileName(UploadedFile $file, $fileName, $filePath)
+    {
         $extension = $file->getClientOriginalExtension();
-        $filename = str_replace(".".$extension, "", $file->getClientOriginalName()); // Filename without extension
-
-        //delete timestamp from file name
-        $temp_arr = explode('_', $filename);
-        if ( isset($temp_arr[0]) ) unset($temp_arr[0]);
-        $filename = implode('_', $temp_arr);
-
-        //here you can manipulate with file name e.g. HASHED
-        return $filename.".".$extension;
+        if (Storage::disk('nextcloud')->exists("{$filePath}/$fileName")) {
+            $clearFilename = str_replace("." . $extension, "", $fileName); // Filename without extension
+            $newFileName = "{$clearFilename}-copy." . $extension;
+            $fileName = $this->checkExistFileName($file, $newFileName, $filePath);
+        }
+        return $fileName;
     }
 
     /**
