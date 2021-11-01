@@ -16,9 +16,9 @@ use Illuminate\Support\Str;
 class CrmFileRepository
 {
 
-    public function getCrmFile($fileName)
+    public function getCrmFile(string $fileUUID)
     {
-        return CrmFile::where('file_name', $fileName)->firstOrFail();
+        return CrmFile::where('uuid', $fileUUID)->firstOrFail();
     }
 
     public function uploadFileData($filePath,
@@ -31,20 +31,8 @@ class CrmFileRepository
         return null;
     }
 
-    public function storeCrmFile(Request $request)
+    public function store(Collection $data, $fileName, $filePath, CrmUser $user )
     {
-
-        $file = new CrmFile();
-        $file->uuid = $request->get('uuid');
-        $file->user_id = $this->user->id;
-        $file->publication = true;
-        $file->file_name = $request->get('resumableFilename');
-        $file->file_type = (isset($fileType[0])) ? $fileType[0] : 'document';
-        $file->extension = $extension;
-        $file->file_source = 'document';
-        $file->file_share = 'document';
-        $file->save();
-
-        return $file;
+        //
     }
 }

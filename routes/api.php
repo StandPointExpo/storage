@@ -16,6 +16,6 @@ use App\Models\CrmFile;
 */
 
 Route::group(['middleware' => 'crm.user', 'prefix' => 'crm-files', 'as' => 'file_manager'], function () {
-   Route::get('/{file_original_name}', [CrmFileController::class, 'crmFileDownload'])->name('crm_file_download');
+   Route::get('/{uuid}', [CrmFileController::class, 'crmFileDownload'])->name('crm_file_download');
    Route::post('/', [CrmFileController::class, 'crmFileUpload'])->name('crm_file_upload');
 });

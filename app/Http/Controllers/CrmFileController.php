@@ -3,23 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Handler;
+use App\Http\Requests\CrmFileRequest;
 use App\Models\CrmFile;
 use App\Repositories\CrmFileRepository;
-use FG\ASN1\Universal\Boolean;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use App\Traits\Statusable;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
-//use Modules\Files\Http\Resources\FileResource;
 use App\Traits\ChunkFileUploadable;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadFailedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\File\File as FileFoundation;
 
 use Pion\Laravel\ChunkUpload\Exceptions\UploadMissingFileException;
 use Pion\Laravel\ChunkUpload\Handler\AbstractHandler;
@@ -39,13 +35,16 @@ class CrmFileController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Handles the file upload
      *
      * @param Request $request
-     * @return JsonResponse | $fileProgress
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
      * @throws UploadMissingFileException
+     * @throws \Pion\Laravel\ChunkUpload\Exceptions\UploadFailedException
      */
-    public function crmFileUpload(Request $request)
+    public function crmFileUpload(CrmFileRequest $request): JsonResponse
     {
         try {
 
@@ -75,73 +74,6 @@ class CrmFileController extends Controller
                 "done" => $handler->getPercentageDone(),
                 'status' => true
             ]);
-
-
-////dd($request->all());
-//            $fileType = explode('/', $request->get('resumableType'));
-//            $arrExtFile = explode('.', $request->get('resumableFilename'));
-//            $extension = end($arrExtFile);
-//            $tmpFileName = Str::random(5) . '.' . $extension;
-//
-//
-//
-//
-//            Storage::disk('public')->put($tmpFileName, 'Contents');
-//            //Convert file to request file input
-//            $tmpFile = new FileFoundation(storage_path('app/public/' . $tmpFileName));
-//            $fileSource = new UploadedFile(
-//                $tmpFile->getPathname(),
-//                $tmpFile->getFilename(),
-//                $tmpFile->getMimeType(),
-//                0,
-//                true // Mark it as test, since the file isn't from real HTTP POST.
-//            );
-//            $request->request->set('file', $fileSource);
-//
-////            $file = $this->repository->storeCrmFile(
-////                $fileSource,
-////                collect($request->only([
-////                    'fileable_id',
-////                    'fileable_type',
-////                    'file_position',
-////                    'folder_name',
-////                    'task_parameter_id'])),
-////                $this->user
-////            );
-////            Storage::disk('public')->delete($imageName);
-////            return $this->success(FileResource::make($file));
-//
-//
-////            $file = new CrmFile();
-////            $file->uuid = $request->get('uuid');
-////            $file->user_id = $this->user->id;
-////            $file->publication = true;
-////            $file->file_name = $request->get('resumableFilename');
-////            $file->file_type = (isset($fileType[0])) ? $fileType[0] : 'document';
-////            $file->extension = $extension;
-////            $file->file_source = 'document';
-////            $file->file_share = 'document';
-////            $file->save();
-////            return $this->success($file);
-//
-//            $filePath = 'test';
-//            $fileProgress = $this->chunkUpload($request);
-//            if ($fileProgress instanceof UploadedFile) {
-//                $file = $this->repository->uploadFileData(
-//                    $filePath,
-//                    $fileProgress,
-//                    collect($request->only([
-//                        'fileable_id',
-//                        'fileable_type',
-//                        'file_position',
-//                        'folder_name',
-//                        'task_parameter_id'])),
-//                    $this->user
-//                );
-//
-//                return $this->success($file);
-//            }
-//            return $fileProgress;
         } catch (Handler $exception) {
             return $this->fail($exception);
         } catch (UploadFailedException $e) {
@@ -156,31 +88,43 @@ class CrmFileController extends Controller
      *
      * @return JsonResponse
      */
-    protected function saveFile(UploadedFile $file, Request $request)
+    protected function saveFile(UploadedFile $file, CrmFileRequest $request): JsonResponse
     {
-        $user_obj = auth()->user();
+        try {
+            $projectFolder = $request->get('project_name');
+            $foldersThree = json_decode($request->get('folders_tree'));
 
+            $filePath = "{$projectFolder}/{$this->foldersThreeString($foldersThree)}/";
+            $fileName = $this->createFilename($file, $filePath);
+
+            //Storage::disk('nextcloud')->makeDirectory($filePath);
+            $finalPath = files_storage("projects/{$filePath}");
+
+            $fileSize = $file->getSize();
+            // move the file name
+            $file->move($finalPath, $fileName);
+
+            return $this->success($this->storeFileData($request, $fileName, $filePath));
+        } catch (Handler $exception) {
+            return $this->fail($exception);
+        }
+
+    }
+
+    public function storeFileData(CrmFileRequest $request, $fileName, $finalPath): CrmFile
+    {
         // Get file mime type
-        $mime_original = $file->getMimeType();
-        $mime = str_replace('/', '-', $mime_original);
-        $projectFolder = $request->get('project_name');
-        $foldersThree = json_decode($request->get('folders_tree'));
-
-        $filePath = "{$projectFolder}/{$this->foldersThreeString($foldersThree)}/";
-        $fileName = $this->createFilename($file, $filePath);
-
-        //Storage::disk('nextcloud')->makeDirectory($filePath);
-        $finalPath = files_storage("projects/{$filePath}");
-
-        $fileSize = $file->getSize();
-        // move the file name
-        $file->move($finalPath, $fileName);
-
-        return response()->json([
-            'path' => $filePath,
-            'name' => $fileName,
-            'mime_type' => $mime
-        ]);
+        $type = (new CrmFile)->getType($request->file);
+        $file = new CrmFile();
+        $file->uuid = $request->get('uuid');
+        $file->user_id = $this->user->id;
+        $file->publication = true;
+        $file->file_name = $fileName;
+        $file->file_type = $type;
+        $file->extension = isset($request->file) ? $request->file->getClientOriginalExtension() : 'file';
+        $file->file_source = $finalPath . $fileName;
+        $file->save();
+        return $file;
     }
 
 
@@ -209,7 +153,7 @@ class CrmFileController extends Controller
     {
         $extension = $file->getClientOriginalExtension();
         if (Storage::disk('nextcloud')->exists("{$filePath}/$fileName")) {
-            $clearFilename = str_replace("." . $extension, "", $fileName); // Filename without extension
+            $clearFilename = trim(str_replace("." . $extension, "", $fileName)); // Filename without extension
             $newFileName = "{$clearFilename}-copy." . $extension;
             $fileName = $this->checkExistFileName($file, $newFileName, $filePath);
         }
@@ -222,12 +166,14 @@ class CrmFileController extends Controller
      * @param $fileName
      * @return BinaryFileResponse
      */
-    public function crmFileDownload($fileName)
+    public function crmFileDownload(string $fileUUID)
     {
         try {
-            $file = $this->repository->getCrmFile($fileName);
-            $headers = array('Content-Type' => mime_content_type(files_storage($file->file_source)));
-            return response()->download(files_storage($file->file_source), $file->file_original_name, $headers);
+            $file = $this->repository->getCrmFile($fileUUID);
+            $disk = Storage::disk('nextcloud');
+            $mimeType = $disk->mimeType($file->file_source);
+            $headers = array('Content-Type' => $mimeType);
+            return $disk->download($file->file_source, $file->file_name, $headers);
         } catch (Handler $exception) {
             return $this->fail($exception);
         }
