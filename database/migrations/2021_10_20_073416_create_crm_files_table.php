@@ -18,7 +18,7 @@ class CreateCrmFilesTable extends Migration
                 $table->unsignedBigInteger('user_id');
                 $table->uuid('uuid');
                 $table->boolean('publication')->default(false);
-                $table->string('file_name');
+                $table->string('file_original_name');
                 $table->string('file_type');
                 $table->string('file_source');
                 $table->string('file_share')->nullable();

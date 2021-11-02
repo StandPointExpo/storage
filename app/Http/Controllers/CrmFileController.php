@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\FileExtException;
 use App\Exceptions\Handler;
 use App\Http\Requests\CrmFileRequest;
 use App\Models\CrmFile;
 use App\Repositories\CrmFileRepository;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Traits\Statusable;
@@ -111,6 +113,15 @@ class CrmFileController extends Controller
 
     }
 
+    /**
+     * Store uploaded file data
+     * @param CrmFileRequest $request
+     * @param $fileName
+     * @param $finalPath
+     * @return CrmFile $file
+     * @throws FileExtException
+     */
+
     public function storeFileData(CrmFileRequest $request, $fileName, $finalPath): CrmFile
     {
         // Get file mime type
@@ -119,12 +130,12 @@ class CrmFileController extends Controller
         $file->uuid = $request->get('uuid');
         $file->user_id = $this->user->id;
         $file->publication = true;
-        $file->file_name = $fileName;
+        $file->file_original_name = $fileName;
         $file->file_type = $type;
         $file->extension = isset($request->file) ? $request->file->getClientOriginalExtension() : 'file';
         $file->file_source = $finalPath . $fileName;
         $file->save();
-        return $file;
+        return $file->load('user');
     }
 
 
@@ -173,7 +184,7 @@ class CrmFileController extends Controller
             $disk = Storage::disk('nextcloud');
             $mimeType = $disk->mimeType($file->file_source);
             $headers = array('Content-Type' => $mimeType);
-            return $disk->download($file->file_source, $file->file_name, $headers);
+            return $disk->download($file->file_source, $file->file_original_name, $headers);
         } catch (Handler $exception) {
             return $this->fail($exception);
         }

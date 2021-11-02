@@ -41,6 +41,6 @@ class CheckFileExtensionRule implements Rule
      */
     public function message(): string
     {
-        return 'The :file extension not support.';
+        return 'The file extension not support.';
     }
 }

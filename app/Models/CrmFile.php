@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\FileExtException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CrmFile extends Model
 {
@@ -25,7 +26,7 @@ class CrmFile extends Model
     /**
      * @var mixed
      */
-    private $file_name;
+    private $file_original_name;
     /**
      * @var mixed|string
      */
@@ -47,7 +48,7 @@ class CrmFile extends Model
       'uuid',
       'user_id',
       'publication',
-      'file_name',
+      'file_original_name',
       'file_type',
       'extension',
       'file_source',
@@ -193,5 +194,9 @@ class CrmFile extends Model
             return 'file';
         }
         return null;
+    }
+    public function user(): HasOne
+    {
+        return $this->hasOne(CrmUser::class, 'id', 'user_id');
     }
 }
