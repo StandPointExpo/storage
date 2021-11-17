@@ -8,7 +8,6 @@ use App\Http\Requests\CrmFileRequest;
 use App\Models\CrmFile;
 use App\Repositories\CrmFileRepository;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Traits\Statusable;
@@ -17,12 +16,11 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Traits\ChunkFileUploadable;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadFailedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-
 use Pion\Laravel\ChunkUpload\Exceptions\UploadMissingFileException;
 use Pion\Laravel\ChunkUpload\Handler\AbstractHandler;
 use Pion\Laravel\ChunkUpload\Handler\HandlerFactory;
 use Pion\Laravel\ChunkUpload\Receiver\FileReceiver;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CrmFileController extends Controller
 {
@@ -174,14 +172,20 @@ class CrmFileController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param $fileName
-     * @return BinaryFileResponse
+     * @param string $fileUUID
+     * @return StreamedResponse
+     * @throws FileExtException
+     * @throws FileNotFoundException
      */
-    public function crmFileDownload(string $fileUUID)
+    public function crmFileDownload(string $fileUUID): StreamedResponse
     {
         try {
             $file = $this->repository->getCrmFile($fileUUID);
             $disk = Storage::disk('nextcloud');
+
+            if(!$disk->exists($file->file_source)) {
+                throw new FileNotFoundException('Path not found', 404);
+            }
             $mimeType = $disk->mimeType($file->file_source);
             $headers = array('Content-Type' => $mimeType);
             return $disk->download($file->file_source, $file->file_original_name, $headers);
