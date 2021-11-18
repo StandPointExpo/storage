@@ -196,4 +196,8 @@ class CrmFileController extends Controller
             return $this->fail($exception);
         }
     }
+
+    public function crmFileShare(string $fileUUID) {
+        // TODO доробити шарінг і відключення шарінгу
+    }
 }
