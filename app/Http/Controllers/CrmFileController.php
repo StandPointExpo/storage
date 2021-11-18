@@ -35,6 +35,9 @@ class CrmFileController extends Controller
         $this->user = auth('crm-api')->user();
         $this->repository = new CrmFileRepository();
     }
+//http://l-storage.standpoint.com.ua/ocs/v2.php/apps/files_sharing/api/v1/shares
+//    file sharing get id from table oc_filecache - check fileName and path and write to  oc_share
+// ShareAPIController createShare
 
     /**
      * Handles the file upload
