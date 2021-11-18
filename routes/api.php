@@ -4,6 +4,7 @@ use App\Http\Controllers\CrmFileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\CrmFile;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -15,7 +16,13 @@ use App\Models\CrmFile;
 |
 */
 
-Route::group(['middleware' => 'crm.user', 'prefix' => 'crm-files', 'as' => 'file_manager'], function () {
-   Route::get('/{uuid}', [CrmFileController::class, 'crmFileDownload'])->name('crm_file_download');
-   Route::post('/', [CrmFileController::class, 'crmFileUpload'])->name('crm_file_upload');
+Route::group(['prefix' => 'crm-files', 'middleware' => [
+    'throttle:1000,1',
+    'crm.user'
+], 'as' => 'file_manager'], function () {
+    Route::get('/{uuid}', [CrmFileController::class, 'crmFileDownload'])
+        ->name('crm_file_download')->middleware('throttle:1000,1');
+    Route::post('/', [CrmFileController::class, 'crmFileUpload'])
+        ->name('crm_file_upload')
+        ->middleware('throttle:1000,1');
 });
