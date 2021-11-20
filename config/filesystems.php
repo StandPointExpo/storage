@@ -44,7 +44,7 @@ return [
 
         'nextcloud' => [
             'driver' => 'local',
-            'root' => files_storage('projects')
+            'root' => cloud_storage_url('projects')
         ],
 
         's3' => [

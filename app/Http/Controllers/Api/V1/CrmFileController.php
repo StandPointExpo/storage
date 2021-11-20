@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\FileExtException;
 use App\Exceptions\Handler;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CrmFileRequest;
 use App\Models\CrmFile;
 use App\Repositories\CrmFileRepository;
@@ -27,6 +28,10 @@ class CrmFileController extends Controller
     use Statusable, ChunkFileUploadable;
 
     private $repository;
+    /**
+     * @var \Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    private $user;
 
     public function __construct()
     {
@@ -70,7 +75,6 @@ class CrmFileController extends Controller
             }
 
             // we are in chunk mode, lets send the current progress
-            /** @var AbstractHandler $handler */
             $handler = $save->handler();
 
             return response()->json([
@@ -101,7 +105,7 @@ class CrmFileController extends Controller
             $fileName = $this->createFilename($file, $filePath);
 
             //Storage::disk('nextcloud')->makeDirectory($filePath);
-            $finalPath = files_storage("projects/{$filePath}");
+            $finalPath = cloud_storage_url("projects/{$filePath}");
 
             $fileSize = $file->getSize();
             // move the file name
@@ -136,6 +140,7 @@ class CrmFileController extends Controller
         $file->extension = isset($request->file) ? $request->file->getClientOriginalExtension() : 'file';
         $file->file_source = $finalPath . $fileName;
         $file->save();
+        // TODO Запустити чергу з індексацією файла і команду - php occ files:scan --all
         return $file->load('user');
     }
 

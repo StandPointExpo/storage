@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Api\V1\CrmUserController;
 use Closure;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Http\Controllers\CrmUserController;
 
 class CrmUserValidate
 {

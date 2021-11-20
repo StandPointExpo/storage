@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\Api\V1\CrmUserController;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\ServiceProvider;
-use App\Http\Controllers\CrmUserController;
 use Illuminate\Http\Request;
 
 class CrmUserServiceProvider extends ServiceProvider
