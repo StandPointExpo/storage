@@ -35,3 +35,13 @@ Route::group(['prefix' => 'crm-files', 'middleware' => [
         ->name('crm_file_upload')
         ->middleware('throttle:1000,1');
 });
+
+Route::group(['prefix' => 'crm-files', 'middleware' => [
+    'crm.service'
+], 'as' => 'file_manager'], function () {
+    Route::group(['prefix' => '{uuid}'], function() {
+        Route::delete('/', [CrmFileController::class, 'deleteFile'])
+            ->name('crm_file_delete');
+
+    });
+});

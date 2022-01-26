@@ -16,3 +16,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/share/{token}', [\App\Http\Controllers\FileShareController::class, 'share'])->name('share');
+Route::get('/download/{uuid}', [\App\Http\Controllers\Api\V1\CrmFileController::class, 'crmFileDownload'])->name('file.download');

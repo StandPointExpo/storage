@@ -12,7 +12,7 @@ class CrmUser extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    const NEXTCLOUD_STORAGE = 'data';
+    const NEXTCLOUD_STORAGE = 'app/data';
     const USER_FOLDER = 'admin';
 
     /**

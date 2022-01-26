@@ -128,6 +128,8 @@ return [
     */
     'auth_server' => env('AUTH_SERVER', 'localhost'),
 
+    'app_service_token' => env('APP_SERVICE_TOKEN', 'localhost'),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
@@ -174,7 +176,7 @@ return [
         /*
          * Application Service Providers...
          */
-        
+
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,

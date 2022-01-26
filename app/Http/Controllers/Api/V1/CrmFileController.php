@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Traits\Statusable;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 use App\Traits\ChunkFileUploadable;
@@ -111,7 +112,7 @@ class CrmFileController extends Controller
             // move the file name
             $file->move($finalPath, $fileName);
 
-            return $this->success($this->storeFileData($request, $fileName, $filePath));
+            return $this->success($this->storeFileData($request, $fileName, $filePath, $fileSize));
         } catch (Handler $exception) {
             return $this->fail($exception);
         }
@@ -127,7 +128,7 @@ class CrmFileController extends Controller
      * @throws FileExtException
      */
 
-    public function storeFileData(CrmFileRequest $request, $fileName, $finalPath): CrmFile
+    public function storeFileData(CrmFileRequest $request, $fileName, $finalPath, $fileSize): CrmFile
     {
         // Get file mime type
         $type = (new CrmFile)->getType($request->file);
@@ -137,6 +138,7 @@ class CrmFileController extends Controller
         $file->publication = true;
         $file->file_original_name = $fileName;
         $file->file_type = $type;
+        $file->size = $fileSize;
         $file->extension = isset($request->file) ? $request->file->getClientOriginalExtension() : 'file';
         $file->file_source = $finalPath . $fileName;
         $file->save();
@@ -203,6 +205,25 @@ class CrmFileController extends Controller
     }
 
     public function crmFileShare(string $fileUUID) {
+//        dd($fileUUID);
         // TODO доробити шарінг і відключення шарінгу
+    }
+
+    public function deleteFile(string $fileUUID) {
+
+        try {
+            $file = $this->repository->getCrmFile($fileUUID);
+            $disk = Storage::disk('nextcloud');
+
+            if(!$disk->exists($file->file_source)) {
+                throw new FileNotFoundException('Path not found', 404);
+            }
+
+            $disk->move($file->file_source, "trash/$file->file_original_name");
+            
+            return $file->delete();
+        } catch (Handler $exception) {
+            return $this->fail($exception);
+        }
     }
 }
