@@ -49,6 +49,7 @@ class CrmFile extends Model
       'user_id',
       'publication',
       'file_original_name',
+      'size',
       'file_type',
       'extension',
       'file_source',
