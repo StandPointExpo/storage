@@ -38,6 +38,7 @@ class CrmUserController extends Controller
      */
     public function getCrmUserToken(Request $request): ?string
     {
+        Log::debug('ddd -' . $request->all());
         $data = CrmToken::where('token', '=', $this->getCrmToken($request))->first();
         if (!$data) {
             return null;
