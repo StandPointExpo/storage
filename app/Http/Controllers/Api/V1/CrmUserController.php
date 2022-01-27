@@ -24,7 +24,6 @@ class CrmUserController extends Controller
     public function getCrmToken(Request $request): ?string
     {
         $token = $request->bearerToken();
-        Log::debug($request->all());
         if (!$token) {
             return null;
         }
@@ -38,7 +37,6 @@ class CrmUserController extends Controller
      */
     public function getCrmUserToken(Request $request): ?string
     {
-        dd($request->bearerToken());
         $data = CrmToken::where('token', '=', $this->getCrmToken($request))->first();
         if (!$data) {
             return null;

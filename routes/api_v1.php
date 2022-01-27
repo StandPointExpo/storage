@@ -21,16 +21,18 @@ Route::group(['prefix' => 'crm-files', 'middleware' => [
     'throttle:1000,1',
     'crm.user'
 ], 'as' => 'file_manager'], function () {
+    Route::get('/downloads/{uuid}', [CrmFileController::class, 'crmFileDownload'])
+        ->name('crm_file_download');
+
     Route::group(['prefix' => '{uuid}'], function() {
         Route::get('/', [CrmFileController::class, 'crmFileDownload'])
-            ->name('crm_file_download')->middleware('throttle:1000,1');
-
+            ->name('crm_file_download');
         Route::get('/share', [CrmFileShareLogController::class, 'crmShareFile'])
             ->name('crm_share_file');
         Route::get('/unshare', [CrmFileShareLogController::class, 'crmUnShareFile'])
             ->name('crm_unshare_file');
-
     });
+
     Route::post('/', [CrmFileController::class, 'crmFileUpload'])
         ->name('crm_file_upload');
 });
