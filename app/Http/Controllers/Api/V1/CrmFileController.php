@@ -83,8 +83,10 @@ class CrmFileController extends Controller
                 'status' => true
             ]);
         } catch (Handler $exception) {
+            Log::error($exception->getMessage());
             return $this->fail($exception);
         } catch (UploadFailedException $e) {
+            Log::error($e->getMessage());
         }
     }
 
@@ -115,6 +117,8 @@ class CrmFileController extends Controller
             return $this->success($this->storeFileData($request, $fileName, $filePath, $fileSize));
         } catch (Handler $exception) {
             return $this->fail($exception);
+        } catch (FileExtException $e) {
+            Log::error($e->getMessage());
         }
 
     }
@@ -220,7 +224,7 @@ class CrmFileController extends Controller
             }
 
             $disk->move($file->file_source, "trash/$file->file_original_name");
-            
+
             return $file->delete();
         } catch (Handler $exception) {
             return $this->fail($exception);
