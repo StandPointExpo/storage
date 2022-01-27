@@ -51,7 +51,7 @@ class CrmUserController extends Controller
     public function getCrmUser(string $token): ?Collection
     {
 
-        $response = Http::withToken($token)->get(config('app.auth_server') . '/api/auth/user');
+        $response = Http::withToken($token)->get(config('app.auth_service_api') . '/api/auth/user');
         if ($response->ok()) {
             $result = $response->collect();
             return collect($result->get('data'));
