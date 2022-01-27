@@ -18,10 +18,10 @@ class CrmServiceAuthentificate
     public function handle(Request $request, Closure $next)
     {
         if(!$request->header('ServiceToken')) {
-            return response('Unauthorized.', 401);
+            return response('Forbidden.', 403);
         };
-        if($request->header('ServiceToken') !== config('app.app_key')) {
-            return response('Unauthorized.', 401);
+        if($request->header('ServiceToken') !== config('app.key')) {
+            return response('Forbidden.', 403);
         };
         return $next($request);
     }

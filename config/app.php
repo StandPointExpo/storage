@@ -126,9 +126,7 @@ return [
     /*
     | Server where get auth user
     */
-    'auth_server' => env('AUTH_SERVER', 'localhost'),
-
-    'app_service_token' => env('APP_SERVICE_TOKEN', 'localhost'),
+    'auth_server' => env('AUTH_SERVICE_API', 'localhost'),
 
     /*
     |--------------------------------------------------------------------------
