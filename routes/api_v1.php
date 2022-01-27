@@ -32,8 +32,7 @@ Route::group(['prefix' => 'crm-files', 'middleware' => [
 
     });
     Route::post('/', [CrmFileController::class, 'crmFileUpload'])
-        ->name('crm_file_upload')
-        ->middleware('throttle:1000,1');
+        ->name('crm_file_upload');
 });
 
 Route::group(['prefix' => 'crm-files', 'middleware' => [

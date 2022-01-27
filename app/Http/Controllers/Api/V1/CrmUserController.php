@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Client\RequestException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class CrmUserController extends Controller
 {
@@ -23,6 +24,7 @@ class CrmUserController extends Controller
     public function getCrmToken(Request $request): ?string
     {
         $token = $request->bearerToken();
+        Log::debug($token);
         if (!$token) {
             return null;
         }
