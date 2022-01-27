@@ -21,7 +21,7 @@ class CrmServiceAuthentificate
         if(!$request->header('ServiceToken')) {
             return response('Unauthorized.', 401);
         };
-        if($request->header('ServiceToken') !== config('app.app_service_token')) {
+        if($request->header('ServiceToken') !== config('app.app_key')) {
             return response('Unauthorized.', 401);
         };
         return $next($request);
