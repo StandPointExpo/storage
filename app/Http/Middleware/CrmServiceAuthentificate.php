@@ -17,7 +17,6 @@ class CrmServiceAuthentificate
      */
     public function handle(Request $request, Closure $next)
     {
-
         if(!$request->header('ServiceToken')) {
             return response('Unauthorized.', 401);
         };
