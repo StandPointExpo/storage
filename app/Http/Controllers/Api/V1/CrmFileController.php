@@ -203,7 +203,7 @@ class CrmFileController extends Controller
             }
             $mimeType = $disk->mimeType($file->file_source);
             $headers = array('Content-Type' => $mimeType);
-            return response()->download($file->file_source, $file->file_original_name, $headers);
+            return $disk->download($file->file_source, $file->file_original_name, $headers);
         } catch (\Throwable $exception) {
             Log::error($exception->getMessage());
             return $this->fail($exception);
