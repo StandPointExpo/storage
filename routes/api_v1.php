@@ -18,7 +18,7 @@ use App\Models\CrmFile;
 */
 
 Route::group(['prefix' => 'crm-files', 'middleware' => [
-    'throttle:1000,1',
+    'throttle:1000000,1',
     'crm.user'
 ], 'as' => 'file_manager'], function () {
     Route::get('/downloads/{uuid}', [CrmFileController::class, 'crmFileDownload'])

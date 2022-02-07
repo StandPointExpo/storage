@@ -82,7 +82,7 @@ class CrmFileController extends Controller
                 "done" => $handler->getPercentageDone(),
                 'status' => true
             ]);
-        } catch (Handler $exception) {
+        } catch (\Throwable $exception) {
             Log::error($exception->getMessage());
             return $this->fail($exception);
         } catch (UploadFailedException $e) {
@@ -115,7 +115,8 @@ class CrmFileController extends Controller
             $file->move($finalPath, $fileName);
 
             return $this->success($this->storeFileData($request, $fileName, $filePath, $fileSize));
-        } catch (Handler $exception) {
+        } catch (\Throwable $exception) {
+            Log::error($exception->getMessage());
             return $this->fail($exception);
         } catch (FileExtException $e) {
             Log::error($e->getMessage());
@@ -191,7 +192,7 @@ class CrmFileController extends Controller
      * @throws FileExtException
      * @throws FileNotFoundException
      */
-    public function crmFileDownload(string $fileUUID): StreamedResponse
+    public function crmFileDownload(string $fileUUID)
     {
         try {
             $file = $this->repository->getCrmFile($fileUUID);
@@ -202,8 +203,9 @@ class CrmFileController extends Controller
             }
             $mimeType = $disk->mimeType($file->file_source);
             $headers = array('Content-Type' => $mimeType);
-            return $disk->download($file->file_source, $file->file_original_name, $headers);
-        } catch (Handler $exception) {
+            return response()->download($file->file_source, $file->file_original_name, $headers);
+        } catch (\Throwable $exception) {
+            Log::error($exception->getMessage());
             return $this->fail($exception);
         }
     }
@@ -226,7 +228,8 @@ class CrmFileController extends Controller
             $disk->move($file->file_source, "trash/$file->file_original_name");
 
             return $file->delete();
-        } catch (Handler $exception) {
+        } catch (\Throwable $exception) {
+            Log::error($exception->getMessage());
             return $this->fail($exception);
         }
     }
