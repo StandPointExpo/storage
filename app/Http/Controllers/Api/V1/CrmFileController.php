@@ -198,30 +198,35 @@ class CrmFileController extends Controller
             $file = $this->repository->getCrmFile($fileUUID);
             $disk = Storage::disk('nextcloud');
 
-            if(!$disk->exists($file->file_source)) {
+            if (!$disk->exists($file->file_source)) {
                 throw new FileNotFoundException('Path not found', 404);
             }
             $mimeType = $disk->mimeType($file->file_source);
             $headers = array('Content-Type' => $mimeType);
-            return $disk->download($file->file_source, $file->file_original_name, $headers);
+            return response()->download(
+                $disk->path($file->file_source),
+                $file->file_original_name,
+                $headers);
         } catch (\Throwable $exception) {
             Log::error($exception->getMessage());
             return $this->fail($exception);
         }
     }
 
-    public function crmFileShare(string $fileUUID) {
+    public function crmFileShare(string $fileUUID)
+    {
 //        dd($fileUUID);
         // TODO доробити шарінг і відключення шарінгу
     }
 
-    public function deleteFile(string $fileUUID) {
+    public function deleteFile(string $fileUUID)
+    {
 
         try {
             $file = $this->repository->getCrmFile($fileUUID);
             $disk = Storage::disk('nextcloud');
 
-            if(!$disk->exists($file->file_source)) {
+            if (!$disk->exists($file->file_source)) {
                 throw new FileNotFoundException('Path not found', 404);
             }
 
