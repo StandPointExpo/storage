@@ -101,6 +101,7 @@ class CrmFile extends Model
         'eps',
         'ai',
         'tif',
+        'ttf',
         'psd',
         'svg',
         //Archives
